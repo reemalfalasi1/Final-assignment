@@ -1,4 +1,5 @@
 class Employee:
+    """Class to represent an employee"""
     def __init__(self, name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details):
         #constructor to initialize the Employee object with provided attributes
         self.name = name  #employee's name

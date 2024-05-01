@@ -1,4 +1,5 @@
 class Event:
+    """Class to represent an event"""
     def __init__(self, event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice):
         self.event_id = event_id  #unique identifier for the event
         self.event_type = event_type  #type of event (e.g., wedding, birthday, corporate)

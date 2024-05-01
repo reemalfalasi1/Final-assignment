@@ -1,14 +1,16 @@
 class Employee:
     def __init__(self, name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details):
-        self.name = name
-        self.employee_id = employee_id
-        self.department = department
-        self.job_title = job_title
-        self.basic_salary = basic_salary
-        self.age = age
-        self.date_of_birth = date_of_birth
-        self.passport_details = passport_details
-    # setters and getters
+        #constructor to initialize the Employee object with provided attributes
+        self.name = name  #employee's name
+        self.employee_id = employee_id  #employee's ID
+        self.department = department  #department where the employee works
+        self.job_title = job_title  #job title of the employee
+        self.basic_salary = basic_salary  #basic salary of the employee
+        self.age = age  # Age of the employee
+        self.date_of_birth = date_of_birth #date of birth of the employee
+        self.passport_details = passport_details#passport details of the employee
+
+    # Getters and Setters for each attribute
     def get_name(self):
         return self.name
 

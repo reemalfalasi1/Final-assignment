@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 import pickle
 
@@ -17,6 +18,45 @@ class Employee:
         self.passport_details = passport_details  # Passport details of the employee
 
 
+class Guest:
+    def __init__(self, guest_id, name, address, contact_details):
+        self.guest_id = guest_id  # Unique identifier for the guest
+        self.name = name  # Name of the guest
+        self.address = address  # Address of the guest
+        self.contact_details = contact_details  # Contact details of the guest
+
+
+class Venue:
+    def __init__(self, venue_id, name, address, contact, min_guests, max_guests):
+        self.venue_id = venue_id  # Unique identifier for the venue
+        self.name = name  # Name of the venue
+        self.address = address  # Address of the venue
+        self.contact = contact  # Contact information for the venue
+        self.min_guests = min_guests  # Minimum number of guests the venue can accommodate
+        self.max_guests = max_guests  # Maximum number of guests the venue can accommodate
+
+
+class Client:
+    """Class to represent client"""
+    def __init__(self, client_id, name, address, contact_details, budget):
+        self.client_id = client_id  # Unique identifier for the client
+        self.name = name  # Name of the client
+        self.address = address  # Address of the client
+        self.contact_details = contact_details  # Contact details of the client
+        self.budget = budget  # Budget allocated by the client
+
+
+class Supplier:
+    """class to represent a supplier"""
+    def __init__(self, supplier_id, name, address, contact_details, service_type):
+        self.supplier_id = supplier_id  # unique identifier for the supplier
+        self.name = name  # Name of the supplier
+        self.address = address  # Address of the supplier
+        self.contact_details = contact_details  # Contact details of the supplier
+        self.service_type = service_type  # Type of service provided by the supplier
+
+
+# Function to add an employee
 # Function to add an employee
 def add_employee():
     employee_id = emp_id_entry.get()
@@ -35,6 +75,7 @@ def add_employee():
         pickle.dump(employee, file)
 
     messagebox.showinfo("Success", "Employee added successfully!")
+
 
 
 # Function to display all employees
@@ -96,67 +137,598 @@ def clear_fields():
     passport_entry.delete(0, tk.END)
     delete_entry.delete(0, tk.END)
 
-
 # Function to handle Employee management window
 def employee_management():
     employee_window = tk.Toplevel(root)
     employee_window.title("Employee Management")
 
-    # Labels
-    tk.Label(employee_window, text="Employee ID:").grid(row=0, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Name:").grid(row=1, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Department:").grid(row=2, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Job Title:").grid(row=3, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Basic Salary:").grid(row=4, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Age:").grid(row=5, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Date of Birth:").grid(row=6, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Passport Details:").grid(row=7, column=0, padx=10, pady=5)
-    tk.Label(employee_window, text="Employee ID to Delete:").grid(row=8, column=0, padx=10, pady=5)
 
-    # Entry fields
-    global emp_id_entry, name_entry, dept_entry, job_title_entry, basic_salary_entry, age_entry, dob_entry, passport_entry, delete_entry
-    emp_id_entry = tk.Entry(employee_window)
-    name_entry = tk.Entry(employee_window)
-    dept_entry = tk.Entry(employee_window)
-    job_title_entry = tk.Entry(employee_window)
-    basic_salary_entry = tk.Entry(employee_window)
-    age_entry = tk.Entry(employee_window)
-    dob_entry = tk.Entry(employee_window)
-    passport_entry = tk.Entry(employee_window)
-    delete_entry = tk.Entry(employee_window)
+# Function to add a guest
+def add_guest():
+    guest_id = guest_id_entry.get()
+    name = guest_name_entry.get()
+    address = guest_address_entry.get()
+    contact_details = guest_contact_entry.get()
 
-    emp_id_entry.grid(row=0, column=1, padx=10, pady=5)
-    name_entry.grid(row=1, column=1, padx=10, pady=5)
-    dept_entry.grid(row=2, column=1, padx=10, pady=5)
-    job_title_entry.grid(row=3, column=1, padx=10, pady=5)
-    basic_salary_entry.grid(row=4, column=1, padx=10, pady=5)
-    age_entry.grid(row=5, column=1, padx=10, pady=5)
-    dob_entry.grid(row=6, column=1, padx=10, pady=5)
-    passport_entry.grid(row=7, column=1, padx=10, pady=5)
-    delete_entry.grid(row=8, column=1, padx=10, pady=5)
+    guest = Guest(guest_id, name, address, contact_details)
 
-    # Buttons
-    tk.Button(employee_window, text="Add Employee", command=add_employee).grid(row=9, column=0, padx=10, pady=5)
-    tk.Button(employee_window, text="Display Employees", command=display_employees).grid(row=9, column=1, padx=10, pady=5)
-    tk.Button(employee_window, text="Delete Employee", command=delete_employee).grid(row=10, column=0, padx=10, pady=5)
-    tk.Button(employee_window, text="Clear Fields", command=clear_fields).grid(row=11, column=0, columnspan=2, padx=10, pady=5)
+    # Write guest details to a binary file using Pickle
+    with open("guests.pkl", "ab") as file:
+        pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest added successfully!")
+
+
+# Function to delete a guest
+def delete_guest():
+    guest_id = guest_id_entry.get()
+
+    # Read all guests from the file
+    guests = []
+    try:
+        with open("guests.pkl", "rb") as file:
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    if guest.guest_id != guest_id:
+                        guests.append(guest)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+        return
+
+    # Write back all guests except the one to be deleted
+    with open("guests.pkl", "wb") as file:
+        for guest in guests:
+            pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest deleted successfully!")
+
+
+# Function to modify guest details
+def modify_guest():
+    guest_id = guest_id_entry.get()
+    name = guest_name_entry.get()
+    address = guest_address_entry.get()
+    contact_details = guest_contact_entry.get()
+
+    # Read all guests from the file
+    guests = []
+    try:
+        with open("guests.pkl", "rb") as file:
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    if guest.guest_id == guest_id:
+                        # Modify the guest details
+                        guest.name = name
+                        guest.address = address
+                        guest.contact_details = contact_details
+                    guests.append(guest)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+        return
+
+    # Write back all guests with modifications
+    with open("guests.pkl", "wb") as file:
+        for guest in guests:
+            pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest details modified successfully!")
+
+
+
+
+# Function to display guest details
+def display_guests():
+    try:
+        # Read guest details from the binary file
+        with open("guests.pkl", "rb") as file:
+            guests_details = ""
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    guests_details += f"Guest ID: {guest.guest_id}\nName: {guest.name}\nAddress: {guest.address}\nContact Details: {guest.contact_details}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Guest Details", guests_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+
+
+# Function to add a venue
+def add_venue():
+    venue_id = venue_id_entry.get()
+    name = venue_name_entry.get()
+    address = venue_address_entry.get()
+    contact = venue_contact_entry.get()
+    min_guests = min_guests_entry.get()
+    max_guests = max_guests_entry.get()
+
+    venue = Venue(venue_id, name, address, contact, min_guests, max_guests)
+
+    # Write venue details to a binary file using Pickle
+    with open("venues.pkl", "ab") as file:
+        pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue added successfully!")
+
+# Function to delete a venue
+def delete_venue():
+    venue_id = venue_id_entry.get()
+
+    # Read all venues from the file
+    venues = []
+    try:
+        with open("venues.pkl", "rb") as file:
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    if venue.venue_id != venue_id:
+                        venues.append(venue)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+        return
+
+    # Write back all venues except the one to be deleted
+    with open("venues.pkl", "wb") as file:
+        for venue in venues:
+            pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue deleted successfully!")
+
+
+# Function to modify venue details
+def modify_venue():
+    venue_id = venue_id_entry.get()
+    name = venue_name_entry.get()
+    address = venue_address_entry.get()
+    contact = venue_contact_entry.get()
+    min_guests = min_guests_entry.get()
+    max_guests = max_guests_entry.get()
+
+    # Read all venues from the file
+    venues = []
+    try:
+        with open("venues.pkl", "rb") as file:
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    if venue.venue_id == venue_id:
+                        # Modify the venue details
+                        venue.name = name
+                        venue.address = address
+                        venue.contact = contact
+                        venue.min_guests = min_guests
+                        venue.max_guests = max_guests
+                    venues.append(venue)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+        return
+
+    # Write back all venues with modifications
+    with open("venues.pkl", "wb") as file:
+        for venue in venues:
+            pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue details modified successfully!")
+
+
+
+
+# Function to display venue details
+def display_venues():
+    try:
+        # Read venue details from the binary file
+        with open("venues.pkl", "rb") as file:
+            venues_details = ""
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    venues_details += f"Venue ID: {venue.venue_id}\nName: {venue.name}\nAddress: {venue.address}\nContact: {venue.contact}\nMin Guests: {venue.min_guests}\nMax Guests: {venue.max_guests}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Venue Details", venues_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+
+
+def display_client_details_by_id():
+    client_id = client_id_entry.get()
+
+    # Read all clients from the file
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id == client_id:
+                        messagebox.showinfo("Client Details", f"Client ID: {client.client_id}\nName: {client.name}\nAddress: {client.address}\nContact Details: {client.contact_details}\nBudget: {client.budget}")
+                        return
+                except EOFError:
+                    break
+        messagebox.showerror("Error", "No client found with the provided ID!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+# Function to add a client
+def add_client():
+    client_id = client_id_entry.get()
+    name = client_name_entry.get()
+    address = client_address_entry.get()
+    contact_details = client_contact_entry.get()
+    budget = client_budget_entry.get()
+
+    client = Client(client_id, name, address, contact_details, budget)
+
+    # Write client details to a binary file using Pickle
+    with open("clients.pkl", "ab") as file:
+        pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client added successfully!")
+
+
+# Function to delete a client
+def delete_client():
+    client_id = client_id_entry.get()
+
+    # Read all clients from the file
+    clients = []
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id != client_id:
+                        clients.append(client)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+        return
+
+    # Write back all clients except the one to be deleted
+    with open("clients.pkl", "wb") as file:
+        for client in clients:
+            pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client deleted successfully!")
+
+
+# Function to modify client details
+def modify_client():
+    client_id = client_id_entry.get()
+    name = client_name_entry.get()
+    address = client_address_entry.get()
+    contact_details = client_contact_entry.get()
+    budget = client_budget_entry.get()
+
+    # Read all clients from the file
+    clients = []
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id == client_id:
+                        # Modify the client details
+                        client.name = name
+                        client.address = address
+                        client.contact_details = contact_details
+                        client.budget = budget
+                    clients.append(client)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+        return
+
+    # Write back all clients with modifications
+    with open("clients.pkl", "wb") as file:
+        for client in clients:
+            pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client details modified successfully!")
+
+
+# Function to display client details
+def display_clients():
+    try:
+        # Read client details from the binary file
+        with open("clients.pkl", "rb") as file:
+            clients_details = ""
+            while True:
+                try:
+                    client = pickle.load(file)
+                    clients_details += f"Client ID: {client.client_id}\nName: {client.name}\nAddress: {client.address}\nContact Details: {client.contact_details}\nBudget: {client.budget}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Client Details", clients_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+
+
+# Function to add a supplier
+def add_supplier():
+    supplier = Supplier(sup_id_entry.get(), sup_name_entry.get(), sup_address_entry.get(), sup_contact_entry.get())
+    with open("suppliers.pkl", "ab") as file:
+        pickle.dump(supplier, file)
+    messagebox.showinfo("Success", "Supplier added successfully!")
+    clear_supplier_fields()
+
+
+# Function to delete a supplier
+def delete_supplier():
+    supplier_id = delete_sup_id_entry.get()
+    found = False
+    updated_suppliers = []
+    try:
+        with open("suppliers.pkl", "rb") as file:
+            while True:
+                try:
+                    supplier = pickle.load(file)
+                    if supplier.supplier_id != supplier_id:
+                        updated_suppliers.append(supplier)
+                    else:
+                        found = True
+                except EOFError:
+                    break
+
+        if found:
+            with open("suppliers.pkl", "wb") as file:
+                for sup in updated_suppliers:
+                    pickle.dump(sup, file)
+            messagebox.showinfo("Success", "Supplier deleted successfully!")
+        else:
+            messagebox.showerror("Error", "Supplier ID not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No suppliers found!")
+
+
+# Function to modify supplier details
+def modify_supplier():
+    # Function body remains unchanged
+    pass
+
+
+# Function to display supplier details
+def display_suppliers():
+    try:
+        with open("suppliers.pkl", "rb") as file:
+            suppliers = ""
+            while True:
+                try:
+                    supplier = pickle.load(file)
+                    suppliers += f"Supplier ID: {supplier.supplier_id}, Name: {supplier.name}, Address: {supplier.address}\n"
+                except EOFError:
+                    break
+            if suppliers:
+                messagebox.showinfo("Suppliers List", suppliers)
+            else:
+                raise FileNotFoundError
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No suppliers found!")
+
+
+# Function to display details of a client given ID number
+def display_client_details_by_id():
+    client_id = client_id_entry.get()
+    found = False
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id == client_id:
+                        messagebox.showinfo("Client Details",
+                                            f"Client ID: {client.client_id}, Name: {client.name}, Address: {client.address}")
+                        found = True
+                        break
+                except EOFError:
+                    break
+        if not found:
+            messagebox.showerror("Error", "Client not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+
+
+
+# Function to display details of a supplier given ID number
+def display_supplier_details_by_id():
+    supplier_id = supplier_id_entry.get()
+    found = False
+    try:
+        with open("suppliers.pkl", "rb") as file:
+            while True:
+                try:
+                    supplier = pickle.load(file)
+                    if supplier.supplier_id == supplier_id:
+                        messagebox.showinfo("Supplier Details",
+                                            f"Supplier ID: {supplier.supplier_id}, Name: {supplier.name}, Address: {supplier.address}")
+                        found = True
+                        break
+                except EOFError:
+                    break
+        if not found:
+            messagebox.showerror("Error", "Supplier not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No suppliers found!")
+
+# Function to display details of a guest given ID number
+def display_guest_details_by_id():
+    guest_id = guest_id_entry.get()
+    found = False
+    try:
+        with open("guests.pkl", "rb") as file:
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    if guest.guest_id == guest_id:
+                        messagebox.showinfo("Guest Details",
+                                            f"Guest ID: {guest.guest_id}, Name: {guest.name}, Address: {guest.address}")
+                        found = True
+                        break
+                except EOFError:
+                    break
+        if not found:
+            messagebox.showerror("Error", "Guest not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+
+
+# Function to display details of a venue given ID number
+def display_venue_details_by_id():
+    venue_id = venue_id_entry.get()
+    found = False
+    try:
+        with open("venues.pkl", "rb") as file:
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    if venue.venue_id == venue_id:
+                        messagebox.showinfo("Venue Details",
+                                            f"Venue ID: {venue.venue_id}, Name: {venue.name}, Address: {venue.address}")
+                        found = True
+                        break
+                except EOFError:
+                    break
+        if not found:
+            messagebox.showerror("Error", "Venue not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+
 
 
 # Main GUI function
 def main():
-    global root
-
     root = tk.Tk()
-    root.title("Employee Management System")
+    root.title("Management System")
 
-    # Button to open Employee management window
-    tk.Button(root, text="Employee", command=employee_management).pack(pady=20)
+    # Create notebook
+    notebook = tk.ttk.Notebook(root)
+    notebook.pack(fill='both', expand=True)
+
+    # Create frames for each entity
+    employee_frame = tk.Frame(notebook)
+    guest_frame = tk.Frame(notebook)
+    venue_frame = tk.Frame(notebook)
+    client_frame = tk.Frame(notebook)
+    supplier_frame = tk.Frame(notebook)
+
+    # Add frames to notebook
+    notebook.add(employee_frame, text='Employees')
+    notebook.add(guest_frame, text='Guests')
+    notebook.add(venue_frame, text='Venues')
+    notebook.add(client_frame, text='Clients')
+    notebook.add(supplier_frame, text='Suppliers')
+
+    # Populate each frame with fields and buttons
+    populate_employee_frame(employee_frame)
+    populate_guest_frame(guest_frame)
+    populate_venue_frame(venue_frame)
+    populate_client_frame(client_frame)
+    populate_supplier_frame(supplier_frame)
 
     root.mainloop()
+def populate_employee_frame(frame):
+    # Labels and entry setup for employee attributes
+    labels = ["Employee ID:", "Name:", "Department:", "Job Title:", "Basic Salary:", "Age:", "Date of Birth:", "Passport Details:"]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
 
+    global emp_id_entry, name_entry, dept_entry, job_title_entry, basic_salary_entry, age_entry, dob_entry, passport_entry
+    emp_id_entry, name_entry, dept_entry, job_title_entry, basic_salary_entry, age_entry, dob_entry, passport_entry = entries
 
+    # Buttons for employee actions
+    tk.Button(frame, text="Add Employee", command=add_employee).grid(row=len(labels), column=0, padx=10, pady=5)
+    tk.Button(frame, text="Delete Employee", command=delete_employee).grid(row=len(labels), column=1, padx=10, pady=5)
+    tk.Button(frame, text="Display Employees", command=display_employees).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+    tk.Button(frame, text="Clear Fields", command=clear_fields).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+
+def populate_guest_frame(frame):
+    # Labels and entry setup for guest attributes
+    labels = ["Guest ID:", "Name:", "Address:", "Contact Details:"]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
+
+    global guest_id_entry, guest_name_entry, guest_address_entry, guest_contact_entry
+    guest_id_entry, guest_name_entry, guest_address_entry, guest_contact_entry = entries
+
+    # Buttons for guest actions
+    tk.Button(frame, text="Add Guest", command=add_guest).grid(row=len(labels), column=0, padx=10, pady=5)
+    tk.Button(frame, text="Delete Guest", command=delete_guest).grid(row=len(labels), column=1, padx=10, pady=5)
+    tk.Button(frame, text="Display Guests", command=display_guests).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+    tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0) for entry in entries]).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+
+def populate_venue_frame(frame):
+    # Labels and entry setup for venue attributes
+    labels = ["Venue ID:", "Name:", "Address:", "Contact:", "Min Guests:", "Max Guests:"]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
+
+    global venue_id_entry, venue_name_entry, venue_address_entry, venue_contact_entry, min_guests_entry, max_guests_entry
+    venue_id_entry, venue_name_entry, venue_address_entry, venue_contact_entry, min_guests_entry, max_guests_entry = entries
+
+    # Buttons for venue actions
+    tk.Button(frame, text="Add Venue", command=add_venue).grid(row=len(labels), column=0, padx=10, pady=5)
+    tk.Button(frame, text="Delete Venue", command=delete_venue).grid(row=len(labels), column=1, padx=10, pady=5)
+    tk.Button(frame, text="Display Venues", command=display_venues).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+    tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0) for entry in entries]).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+
+def populate_client_frame(frame):
+    # Labels and entry setup for client attributes
+    labels = ["Client ID:", "Name:", "Address:", "Contact Details:", "Budget:"]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
+
+    global client_id_entry, client_name_entry, client_address_entry, client_contact_entry, client_budget_entry
+    client_id_entry, client_name_entry, client_address_entry, client_contact_entry, client_budget_entry = entries
+
+    # Buttons for client actions
+    tk.Button(frame, text="Add Client", command=add_client).grid(row=len(labels), column=0, padx=10, pady=5)
+    tk.Button(frame, text="Delete Client", command=delete_client).grid(row=len(labels), column=1, padx=10, pady=5)
+    tk.Button(frame, text="Display Clients", command=display_clients).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+    tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0) for entry in entries]).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+def populate_supplier_frame(frame):
+    # Labels and entry setup for supplier attributes
+    labels = ["Supplier ID:", "Name:", "Address:", "Contact Details:", "Service Type:"]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
+
+    global sup_id_entry, sup_name_entry, sup_address_entry, sup_contact_entry, service_type_entry
+    sup_id_entry, sup_name_entry, sup_address_entry, sup_contact_entry, service_type_entry = entries
+
+    # Buttons for supplier actions
+    tk.Button(frame, text="Add Supplier", command=add_supplier).grid(row=len(labels), column=0, padx=10, pady=5)
+    tk.Button(frame, text="Delete Supplier", command=delete_supplier).grid(row=len(labels), column=1, padx=10, pady=5)
+    tk.Button(frame, text="Modify Supplier", command=modify_supplier).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+    tk.Button(frame, text="Display Suppliers", command=display_suppliers).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+    tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0, tk.END) for entry in entries]).grid(row=len(labels) + 2, column=0, columnspan=2, padx=10, pady=5)
 if __name__ == "__main__":
     main()
-
-
-

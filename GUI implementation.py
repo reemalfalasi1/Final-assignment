@@ -2,6 +2,15 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog, messagebox
 import pickle
+from data_manager import DataManager
+
+# Create instances of DataManager for each entity
+employee_manager = DataManager('employees.pkl')
+guest_manager = DataManager('guests.pkl')
+venue_manager = DataManager('venues.pkl')
+client_manager = DataManager('clients.pkl')
+supplier_manager = DataManager('suppliers.pkl')
+event_manager = DataManager('events.pkl')
 
 
 class Employee:

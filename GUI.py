@@ -55,8 +55,21 @@ class Supplier:
         self.contact_details = contact_details  # Contact details of the supplier
         self.service_type = service_type  # Type of service provided by the supplier
 
+class Event:
+    """Class to represent an event"""
+    def __init__(self, event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice):
+        self.event_id = event_id
+        self.event_type = event_type
+        self.theme = theme
+        self.date = date
+        self.time = time
+        self.duration = duration
+        self.venue_address = venue_address
+        self.client_id = client_id
+        self.guest_list = guest_list
+        self.suppliers = suppliers
+        self.invoice = invoice
 
-# Function to add an employee
 # Function to add an employee
 def add_employee():
     employee_id = emp_id_entry.get()
@@ -495,7 +508,92 @@ def delete_supplier():
 def modify_supplier():
     # Function body remains unchanged
     pass
+def add_event(event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice):
+    event = Event(event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice)
+    with open("events.pkl", "ab") as file:
+        pickle.dump(event, file)
+    messagebox.showinfo("Success", "Event added successfully!")
 
+def delete_event(event_id):
+    updated_events = []
+    found = False
+    try:
+        with open("events.pkl", "rb") as file:
+            while True:
+                try:
+                    event = pickle.load(file)
+                    if event.event_id != event_id:
+                        updated_events.append(event)
+                    else:
+                        found = True
+                except EOFError:
+                    break
+        if found:
+            with open("events.pkl", "wb") as file:
+                for event in updated_events:
+                    pickle.dump(event, file)
+            messagebox.showinfo("Success", "Event deleted successfully!")
+        else:
+            messagebox.showerror("Error", "Event ID not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def modify_event(event_id, new_event_type, new_theme, new_date, new_time, new_duration, new_venue_address, new_client_id, new_guest_list, new_suppliers, new_invoice):
+    updated_events = []
+    found = False
+    try:
+        with open("events.pkl", "rb") as file:
+            while True:
+                try:
+                    event = pickle.load(file)
+                    if event.event_id == event_id:
+                        event.event_type = new_event_type
+                        event.theme = new_theme
+                        event.date = new_date
+                        event.time = new_time
+                        event.duration = new_duration
+                        event.venue_address = new_venue_address
+                        event.client_id = new_client_id
+                        event.guest_list = new_guest_list
+                        event.suppliers = new_suppliers
+                        event.invoice = new_invoice
+                        found = True
+                    updated_events.append(event)
+                except EOFError:
+                    break
+        if found:
+            with open("events.pkl", "wb") as file:
+                for event in updated_events:
+                    pickle.dump(event, file)
+            messagebox.showinfo("Success", "Event modified successfully!")
+        else:
+            messagebox.showerror("Error", "Event not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def display_events():
+    try:
+        with open("events.pkl", "rb") as file:
+            events_details = ""
+            while True:
+                try:
+                    event = pickle.load(file)
+                    events_details += (f"Event ID: {event.event_id}\nType: {event.event_type}\nTheme: {event.theme}\n"
+                                       f"Date: {event.date}\nTime: {event.time}\nDuration: {event.duration}\n"
+                                       f"Venue Address: {event.venue_address}\nClient ID: {event.client_id}\n"
+                                       f"Guest List: {event.guest_list}\nSuppliers: {event.suppliers}\nInvoice: {event.invoice}\n\n")
+                except EOFError:
+                    break
+            if events_details:
+                messagebox.showinfo("Event Details", events_details)
+            else:
+                raise FileNotFoundError
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def clear_event_fields(entries):
+    for entry in entries:
+        entry.delete(0, tk.END)
 
 # Function to display supplier details
 def display_suppliers():
@@ -620,6 +718,7 @@ def main():
     venue_frame = tk.Frame(notebook)
     client_frame = tk.Frame(notebook)
     supplier_frame = tk.Frame(notebook)
+    event_frame = tk.Frame(notebook)
 
     # Add frames to notebook
     notebook.add(employee_frame, text='Employees')
@@ -627,6 +726,8 @@ def main():
     notebook.add(venue_frame, text='Venues')
     notebook.add(client_frame, text='Clients')
     notebook.add(supplier_frame, text='Suppliers')
+    notebook.add(event_frame, text='Events')
+
 
     # Populate each frame with fields and buttons
     populate_employee_frame(employee_frame)
@@ -634,6 +735,7 @@ def main():
     populate_venue_frame(venue_frame)
     populate_client_frame(client_frame)
     populate_supplier_frame(supplier_frame)
+    populate_event_frame(event_frame)
 
     root.mainloop()
 def populate_employee_frame(frame):
@@ -730,5 +832,51 @@ def populate_supplier_frame(frame):
     tk.Button(frame, text="Modify Supplier", command=modify_supplier).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
     tk.Button(frame, text="Display Suppliers", command=display_suppliers).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
     tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0, tk.END) for entry in entries]).grid(row=len(labels) + 2, column=0, columnspan=2, padx=10, pady=5)
+
+
+def populate_event_frame(frame):
+    # Labels and entry setup for event attributes
+    labels = [
+        "Event ID:", "Event Type:", "Theme:", "Date:", "Time:",
+        "Duration:", "Venue Address:", "Client ID:", "Guest List:",
+        "Suppliers:", "Invoice:"
+    ]
+    entries = []
+    for i, label in enumerate(labels):
+        tk.Label(frame, text=label).grid(row=i, column=0, padx=10, pady=5)
+        entry = tk.Entry(frame)
+        entry.grid(row=i, column=1, padx=10, pady=5)
+        entries.append(entry)
+
+    global event_id_entry, event_type_entry, theme_entry, date_entry, time_entry, \
+        duration_entry, venue_address_entry, client_id_entry, guest_list_entry, \
+        suppliers_entry, invoice_entry
+    (event_id_entry, event_type_entry, theme_entry, date_entry, time_entry,
+     duration_entry, venue_address_entry, client_id_entry, guest_list_entry,
+     suppliers_entry, invoice_entry) = entries
+
+    # Buttons for event actions
+    tk.Button(frame, text="Add Event", command=lambda: add_event(
+        event_id_entry.get(), event_type_entry.get(), theme_entry.get(), date_entry.get(),
+        time_entry.get(), duration_entry.get(), venue_address_entry.get(),
+        client_id_entry.get(), guest_list_entry.get(), suppliers_entry.get(), invoice_entry.get()
+    )).grid(row=len(labels), column=0, padx=10, pady=5)
+
+    tk.Button(frame, text="Delete Event", command=lambda: delete_event(event_id_entry.get())).grid(row=len(labels),
+                                                                                                   column=1, padx=10,
+                                                                                                   pady=5)
+
+    tk.Button(frame, text="Modify Event", command=lambda: modify_event(
+        event_id_entry.get(), event_type_entry.get(), theme_entry.get(), date_entry.get(),
+        time_entry.get(), duration_entry.get(), venue_address_entry.get(),
+        client_id_entry.get(), guest_list_entry.get(), suppliers_entry.get(), invoice_entry.get()
+    )).grid(row=len(labels) + 1, column=0, padx=10, pady=5)
+
+    tk.Button(frame, text="Display Events", command=display_events).grid(row=len(labels) + 1, column=1, padx=10, pady=5)
+
+    tk.Button(frame, text="Clear Fields", command=lambda: [entry.delete(0, tk.END) for entry in entries]).grid(
+        row=len(labels) + 2, column=0, columnspan=2, padx=10, pady=5)
+
+
 if __name__ == "__main__":
     main()

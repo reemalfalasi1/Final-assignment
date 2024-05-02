@@ -109,7 +109,7 @@ class Employee:
         self.department = department  #department where the employee works
         self.job_title = job_title  #job title of the employee
         self.basic_salary = basic_salary  #basic salary of the employee
-        self.age = age  # Age of the employee
+        self.age = age  #Age of the employee
         self.date_of_birth = date_of_birth #date of birth of the employee
         self.passport_details = passport_details#passport details of the employee
 

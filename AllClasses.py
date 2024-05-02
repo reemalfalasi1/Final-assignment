@@ -100,6 +100,92 @@ class Event:
     # Setter method for invoice
     def set_invoice(self, invoice):
         self.invoice = invoice
+def add_event(event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice):
+    event = Event(event_id, event_type, theme, date, time, duration, venue_address, client_id, guest_list, suppliers, invoice)
+    with open("events.pkl", "ab") as file:
+        pickle.dump(event, file)
+    messagebox.showinfo("Success", "Event added successfully!")
+
+def delete_event(event_id):
+    updated_events = []
+    found = False
+    try:
+        with open("events.pkl", "rb") as file:
+            while True:
+                try:
+                    event = pickle.load(file)
+                    if event.event_id != event_id:
+                        updated_events.append(event)
+                    else:
+                        found = True
+                except EOFError:
+                    break
+        if found:
+            with open("events.pkl", "wb") as file:
+                for event in updated_events:
+                    pickle.dump(event, file)
+            messagebox.showinfo("Success", "Event deleted successfully!")
+        else:
+            messagebox.showerror("Error", "Event ID not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def modify_event(event_id, new_event_type, new_theme, new_date, new_time, new_duration, new_venue_address, new_client_id, new_guest_list, new_suppliers, new_invoice):
+    updated_events = []
+    found = False
+    try:
+        with open("events.pkl", "rb") as file:
+            while True:
+                try:
+                    event = pickle.load(file)
+                    if event.event_id == event_id:
+                        event.event_type = new_event_type
+                        event.theme = new_theme
+                        event.date = new_date
+                        event.time = new_time
+                        event.duration = new_duration
+                        event.venue_address = new_venue_address
+                        event.client_id = new_client_id
+                        event.guest_list = new_guest_list
+                        event.suppliers = new_suppliers
+                        event.invoice = new_invoice
+                        found = True
+                    updated_events.append(event)
+                except EOFError:
+                    break
+        if found:
+            with open("events.pkl", "wb") as file:
+                for event in updated_events:
+                    pickle.dump(event, file)
+            messagebox.showinfo("Success", "Event modified successfully!")
+        else:
+            messagebox.showerror("Error", "Event not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def display_events():
+    try:
+        with open("events.pkl", "rb") as file:
+            events_details = ""
+            while True:
+                try:
+                    event = pickle.load(file)
+                    events_details += (f"Event ID: {event.event_id}\nType: {event.event_type}\nTheme: {event.theme}\n"
+                                       f"Date: {event.date}\nTime: {event.time}\nDuration: {event.duration}\n"
+                                       f"Venue Address: {event.venue_address}\nClient ID: {event.client_id}\n"
+                                       f"Guest List: {event.guest_list}\nSuppliers: {event.suppliers}\nInvoice: {event.invoice}\n\n")
+                except EOFError:
+                    break
+            if events_details:
+                messagebox.showinfo("Event Details", events_details)
+            else:
+                raise FileNotFoundError
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No events found!")
+
+def clear_event_fields(entries):
+    for entry in entries:
+        entry.delete(0, tk.END)
 class Employee:
     """Class to represent an employee"""
     def __init__(self, name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details):
@@ -161,7 +247,84 @@ class Employee:
 
     def set_passport_details(self, passport_details):
         self.passport_details = passport_details
+def add_employee():
+    employee_id = emp_id_entry.get()
+    name = name_entry.get()
+    department = dept_entry.get()
+    job_title = job_title_entry.get()
+    basic_salary = basic_salary_entry.get()
+    age = age_entry.get()
+    date_of_birth = dob_entry.get()
+    passport_details = passport_entry.get()
 
+    employee = Employee(name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details)
+
+    # Write employee details to a binary file using Pickle
+    with open("employees.pkl", "ab") as file:
+        pickle.dump(employee, file)
+
+    messagebox.showinfo("Success", "Employee added successfully!")
+
+
+
+# Function to display all employees
+def display_employees():
+    try:
+        # Read employee details from the binary file
+        with open("employees.pkl", "rb") as file:
+            employee_details = ""
+            while True:
+                try:
+                    employee = pickle.load(file)
+                    employee_details += f"Employee ID: {employee.employee_id}\nName: {employee.name}\nDepartment: {employee.department}\nJob Title: {getattr(employee, 'job_title', 'Not available')}\nBasic Salary: {getattr(employee, 'basic_salary', 'Not available')}\nAge: {getattr(employee, 'age', 'Not available')}\nDate of Birth: {getattr(employee, 'date_of_birth', 'Not available')}\nPassport Details: {getattr(employee, 'passport_details', 'Not available')}\n\n"
+                except EOFError:
+                    break
+            if employee_details:
+                messagebox.showinfo("Employee Details", employee_details)
+            else:
+                messagebox.showerror("Error", "No employees found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No employees found!")
+
+
+# Function to delete an employee
+def delete_employee():
+    employee_id = delete_entry.get()
+
+    # Read employee details from the binary file
+    try:
+        with open("employees.pkl", "rb") as file:
+            employees = []
+            while True:
+                try:
+                    employee = pickle.load(file)
+                    if employee.employee_id != employee_id:
+                        employees.append(employee)
+                except EOFError:
+                    break
+
+        # Write updated employee details back to the file
+        with open("employees.pkl", "wb") as file:
+            for employee in employees:
+                pickle.dump(employee, file)
+
+        messagebox.showinfo("Success", "Employee deleted successfully!")
+
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No employees found!")
+
+
+# Function to clear input fields
+def clear_fields():
+    emp_id_entry.delete(0, tk.END)
+    name_entry.delete(0, tk.END)
+    dept_entry.delete(0, tk.END)
+    job_title_entry.delete(0, tk.END)
+    basic_salary_entry.delete(0, tk.END)
+    age_entry.delete(0, tk.END)
+    dob_entry.delete(0, tk.END)
+    passport_entry.delete(0, tk.END)
+    delete_entry.delete(0, tk.END)
 
 class Guest:
     def __init__(self, guest_id, name, address, contact_details):
@@ -203,9 +366,103 @@ class Guest:
     def set_contact_details(self, contact_details):
         """Set the guest's contact details."""
         self.contact_details = contact_details
+# Function to add a guest
+def add_guest():
+    guest_id = guest_id_entry.get()
+    name = guest_name_entry.get()
+    address = guest_address_entry.get()
+    contact_details = guest_contact_entry.get()
 
+    guest = Guest(guest_id, name, address, contact_details)
+
+    # Write guest details to a binary file using Pickle
+    with open("guests.pkl", "ab") as file:
+        pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest added successfully!")
+
+
+# Function to delete a guest
+def delete_guest():
+    guest_id = guest_id_entry.get()
+
+    # Read all guests from the file
+    guests = []
+    try:
+        with open("guests.pkl", "rb") as file:
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    if guest.guest_id != guest_id:
+                        guests.append(guest)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+        return
+
+    # Write back all guests except the one to be deleted
+    with open("guests.pkl", "wb") as file:
+        for guest in guests:
+            pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest deleted successfully!")
+
+
+# Function to modify guest details
+def modify_guest():
+    guest_id = guest_id_entry.get()
+    name = guest_name_entry.get()
+    address = guest_address_entry.get()
+    contact_details = guest_contact_entry.get()
+
+    # Read all guests from the file
+    guests = []
+    try:
+        with open("guests.pkl", "rb") as file:
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    if guest.guest_id == guest_id:
+                        # Modify the guest details
+                        guest.name = name
+                        guest.address = address
+                        guest.contact_details = contact_details
+                    guests.append(guest)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
+        return
+
+    # Write back all guests with modifications
+    with open("guests.pkl", "wb") as file:
+        for guest in guests:
+            pickle.dump(guest, file)
+
+    messagebox.showinfo("Success", "Guest details modified successfully!")
+
+
+
+
+# Function to display guest details
+def display_guests():
+    try:
+        # Read guest details from the binary file
+        with open("guests.pkl", "rb") as file:
+            guests_details = ""
+            while True:
+                try:
+                    guest = pickle.load(file)
+                    guests_details += f"Guest ID: {guest.guest_id}\nName: {guest.name}\nAddress: {guest.address}\nContact Details: {guest.contact_details}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Guest Details", guests_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No guests found!")
 
 class Venue:
+    """class to represent a venue"""
     def __init__(self, venue_id, name, address, contact, min_guests, max_guests):
         self.venue_id = venue_id  # Unique identifier for the venue
         self.name = name  # Name of the venue
@@ -263,7 +520,101 @@ class Venue:
     def set_max_guests(self, max_guests):
         """Set the maximum number of guests the venue can accommodate."""
         self.max_guests = max_guests
+def add_venue():
+    venue_id = venue_id_entry.get()
+    name = venue_name_entry.get()
+    address = venue_address_entry.get()
+    contact = venue_contact_entry.get()
+    min_guests = min_guests_entry.get()
+    max_guests = max_guests_entry.get()
 
+    venue = Venue(venue_id, name, address, contact, min_guests, max_guests)
+
+    # Write venue details to a binary file using Pickle
+    with open("venues.pkl", "ab") as file:
+        pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue added successfully!")
+
+# Function to delete a venue
+def delete_venue():
+    venue_id = venue_id_entry.get()
+
+    # Read all venues from the file
+    venues = []
+    try:
+        with open("venues.pkl", "rb") as file:
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    if venue.venue_id != venue_id:
+                        venues.append(venue)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+        return
+
+    # Write back all venues except the one to be deleted
+    with open("venues.pkl", "wb") as file:
+        for venue in venues:
+            pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue deleted successfully!")
+
+
+# Function to modify venue details
+def modify_venue():
+    venue_id = venue_id_entry.get()
+    name = venue_name_entry.get()
+    address = venue_address_entry.get()
+    contact = venue_contact_entry.get()
+    min_guests = min_guests_entry.get()
+    max_guests = max_guests_entry.get()
+
+    # Read all venues from the file
+    venues = []
+    try:
+        with open("venues.pkl", "rb") as file:
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    if venue.venue_id == venue_id:
+                        # Modify the venue details
+                        venue.name = name
+                        venue.address = address
+                        venue.contact = contact
+                        venue.min_guests = min_guests
+                        venue.max_guests = max_guests
+                    venues.append(venue)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
+        return
+
+    # Write back all venues with modifications
+    with open("venues.pkl", "wb") as file:
+        for venue in venues:
+            pickle.dump(venue, file)
+
+    messagebox.showinfo("Success", "Venue details modified successfully!")
+
+# Function to display venue details
+def display_venues():
+    try:
+        # Read venue details from the binary file
+        with open("venues.pkl", "rb") as file:
+            venues_details = ""
+            while True:
+                try:
+                    venue = pickle.load(file)
+                    venues_details += f"Venue ID: {venue.venue_id}\nName: {venue.name}\nAddress: {venue.address}\nContact: {venue.contact}\nMin Guests: {venue.min_guests}\nMax Guests: {venue.max_guests}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Venue Details", venues_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No venues found!")
 
 class Client:
     """Class to represent client"""
@@ -313,7 +664,101 @@ class Client:
     # Setter method for budget
     def set_budget(self, budget):
         self.budget = budget
+# Function to add a client
+def add_client():
+    client_id = client_id_entry.get()
+    name = client_name_entry.get()
+    address = client_address_entry.get()
+    contact_details = client_contact_entry.get()
+    budget = client_budget_entry.get()
 
+    client = Client(client_id, name, address, contact_details, budget)
+
+    # Write client details to a binary file using Pickle
+    with open("clients.pkl", "ab") as file:
+        pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client added successfully!")
+
+
+# Function to delete a client
+def delete_client():
+    client_id = client_id_entry.get()
+
+    # Read all clients from the file
+    clients = []
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id != client_id:
+                        clients.append(client)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+        return
+
+    # Write back all clients except the one to be deleted
+    with open("clients.pkl", "wb") as file:
+        for client in clients:
+            pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client deleted successfully!")
+
+
+# Function to modify client details
+def modify_client():
+    client_id = client_id_entry.get()
+    name = client_name_entry.get()
+    address = client_address_entry.get()
+    contact_details = client_contact_entry.get()
+    budget = client_budget_entry.get()
+
+    # Read all clients from the file
+    clients = []
+    try:
+        with open("clients.pkl", "rb") as file:
+            while True:
+                try:
+                    client = pickle.load(file)
+                    if client.client_id == client_id:
+                        # Modify the client details
+                        client.name = name
+                        client.address = address
+                        client.contact_details = contact_details
+                        client.budget = budget
+                    clients.append(client)
+                except EOFError:
+                    break
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
+        return
+
+    # Write back all clients with modifications
+    with open("clients.pkl", "wb") as file:
+        for client in clients:
+            pickle.dump(client, file)
+
+    messagebox.showinfo("Success", "Client details modified successfully!")
+
+
+# Function to display client details
+def display_clients():
+    try:
+        # Read client details from the binary file
+        with open("clients.pkl", "rb") as file:
+            clients_details = ""
+            while True:
+                try:
+                    client = pickle.load(file)
+                    clients_details += f"Client ID: {client.client_id}\nName: {client.name}\nAddress: {client.address}\nContact Details: {client.contact_details}\nBudget: {client.budget}\n\n"
+                except EOFError:
+                    break
+        messagebox.showinfo("Client Details", clients_details)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No clients found!")
 
 class Supplier:
     """class to represent a supplier"""
@@ -358,8 +803,69 @@ class Supplier:
 
     def service_type(self, value):
         self._service_type = value
+# Function to add a supplier
+def add_supplier():
+    supplier = Supplier(sup_id_entry.get(), sup_name_entry.get(), sup_address_entry.get(), sup_contact_entry.get(),service_type_entry.get())
+    with open("suppliers.pkl", "ab") as file:
+        pickle.dump(supplier, file)
+    messagebox.showinfo("Success", "Supplier added successfully!")
+    clear_supplier_fields()
 
 
+# Function to delete a supplier
+def delete_supplier():
+    supplier_id = delete_sup_id_entry.get()
+    found = False
+    updated_suppliers = []
+    try:
+        with open("suppliers.pkl", "rb") as file:
+            while True:
+                try:
+                    supplier = pickle.load(file)
+                    if supplier.supplier_id != supplier_id:
+                        updated_suppliers.append(supplier)
+                    else:
+                        found = True
+                except EOFError:
+                    break
+
+        if found:
+            with open("suppliers.pkl", "wb") as file:
+                for sup in updated_suppliers:
+                    pickle.dump(sup, file)
+            messagebox.showinfo("Success", "Supplier deleted successfully!")
+        else:
+            messagebox.showerror("Error", "Supplier ID not found!")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No suppliers found!")
+
+def clear_supplier_fields():
+    # Assuming you have these entry fields as global variables or accessible in this scope.
+    sup_id_entry.delete(0, tk.END)
+    sup_name_entry.delete(0, tk.END)
+    sup_address_entry.delete(0, tk.END)
+    sup_contact_entry.delete(0, tk.END)
+    service_type_entry.delete(0, tk.END)
+
+# Function to modify supplier details
+def modify_supplier():
+    pass
+def display_suppliers():
+    try:
+        with open("suppliers.pkl", "rb") as file:
+            suppliers = ""
+            while True:
+                try:
+                    supplier = pickle.load(file)
+                    suppliers += f"Supplier ID: {supplier.supplier_id}, Name: {supplier.name}, Address: {supplier.address}\n"
+                except EOFError:
+                    break
+            if suppliers:
+                messagebox.showinfo("Suppliers List", suppliers)
+            else:
+                raise FileNotFoundError
+    except FileNotFoundError:
+        messagebox.showerror("Error", "No suppliers found!")
 class SalesPerson(Employee):
     """Handles sales operations with specific targets."""
     def __init__(self, name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details, sales_target):
@@ -465,16 +971,6 @@ class Designer(Employee):
 
     def set_design_projects(self, design_projects):
         self.design_projects = design_projects
-
-
-class Handyman(Employee):
-    """Performs maintenance and repair tasks for event setups."""
-    def __init__(self, name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details):
-        super().__init__(name, employee_id, department, job_title, basic_salary, age, date_of_birth, passport_details)
-
-    def perform_maintenance(self):
-        """Perform routine maintenance tasks."""
-        print("Performing maintenance tasks...")
 
 
 class CateringCompany(Supplier):
@@ -610,61 +1106,3 @@ class FurnitureSupplyCompany(Supplier):
         self.delivery_options = delivery_options
 
 
-class Photographer(Supplier):
-    """A specialized Supplier subclass for photography services."""
-    def __init__(self, supplier_id, name, address, contact_details, photography_styles, services_offered):
-        super().__init__(supplier_id, name, address, contact_details, 'Photography')
-        self.photography_styles = photography_styles
-        self.services_offered = services_offered
-
-    def add_photography_style(self, style):
-        """Add a photography style if it's not already offered."""
-        if style not in self.photography_styles:
-            self.photography_styles.append(style)
-
-    def remove_photography_style(self, style):
-        """Remove a photography style if it exists."""
-        if style in self.photography_styles:
-            self.photography_styles.remove(style)
-
-    def get_photography_styles(self):
-        return self.photography_styles
-
-    def set_photography_styles(self, photography_styles):
-        self.photography_styles = photography_styles
-
-    def get_services_offered(self):
-        return self.services_offered
-
-    def set_services_offered(self, services_offered):
-        self.services_offered = services_offered
-
-
-class TransportationCompany(Supplier):
-    """A specialized Supplier subclass for transportation services."""
-    def __init__(self, supplier_id, name, address, contact_details, vehicle_types, max_capacity):
-        super().__init__(supplier_id, name, address, contact_details, 'Transportation')
-        self.vehicle_types = vehicle_types
-        self.max_capacity = max_capacity
-
-    def add_vehicle_type(self, type):
-        """Add a vehicle type if it's not already offered."""
-        if type not in self.vehicle_types:
-            self.vehicle_types.append(type)
-
-    def remove_vehicle_type(self, type):
-        """Remove a vehicle type if it exists."""
-        if type in self.vehicle_types:
-            self.vehicle_types.remove(type)
-
-    def get_vehicle_types(self):
-        return self.vehicle_types
-
-    def set_vehicle_types(self, vehicle_types):
-        self.vehicle_types = vehicle_types
-
-    def get_max_capacity(self):
-        return self.max_capacity
-
-    def set_max_capacity(self, max_capacity):
-        self.max_capacity = max_capacity
